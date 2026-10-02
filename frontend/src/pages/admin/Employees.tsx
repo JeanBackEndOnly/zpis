@@ -1,3 +1,5 @@
+import { Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Badge from '../../components/Badge/Badge';
 import StatusBadge from '../../components/Badge/StatusBadge';
 import CrudPage, { type Option } from '../../components/admin/CrudPage';
@@ -32,6 +34,15 @@ export default function Employees() {
       service={employeeService}
       rowLabel={(r) => r.full_name}
       twoColumn
+      rowActions={(r) => (
+        <Link
+          to={`/admin/employees/${r.id}`}
+          aria-label="View profile"
+          className="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+        >
+          <Eye className="h-4 w-4" />
+        </Link>
+      )}
       filters={[
         { name: 'user_role', label: 'Roles', options: roleOptions },
         { name: 'status', label: 'Statuses', options: statusOptions },
@@ -45,7 +56,9 @@ export default function Employees() {
                 {`${r.first_name[0] ?? ''}${r.last_name[0] ?? ''}`.toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-medium">{r.full_name}</p>
+                <Link to={`/admin/employees/${r.id}`} className="block truncate font-medium transition hover:text-red-600">
+                  {r.full_name}
+                </Link>
                 <p className="truncate text-xs text-gray-500">{r.email}</p>
               </div>
             </div>

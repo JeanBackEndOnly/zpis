@@ -14,8 +14,9 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\EmployeeInformation;
 
 #[Fillable([
-    'first_name', 'middle_name', 'last_name', 'suffix',
-    'sex', 'birthday', 'email', 'password', 'user_role', 'status',
+    'first_name', 'middle_name', 'last_name', 'suffix', 'contact',
+    'sex', 'civil_status', 'citizenship', 'religion', 'birthday', 'birthPlace',
+    'email', 'password', 'user_role', 'status',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable

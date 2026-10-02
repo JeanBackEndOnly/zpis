@@ -21,6 +21,9 @@ return new class extends Migration
             $table->decimal('used', 12, 2);
             $table->decimal('remaining', 12, 2);
             $table->timestamps();
+
+            // One row per leave type per employee
+            $table->unique(['employee_id', 'leave_type']);
         });
     }
 

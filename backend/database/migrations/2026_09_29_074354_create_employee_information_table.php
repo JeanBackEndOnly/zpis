@@ -13,25 +13,31 @@ return new class extends Migration
     {
         Schema::create('employee_information', function (Blueprint $table) {
             $table->id();
+
+            // Deleting a user removes their employee record
             $table->foreignId('user_id')
+                ->unique()
                 ->constrained('users')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
+
+            // restrictOnDelete: a department/unit/position that is still in use cannot be deleted
             $table->foreignId('department_id')
                 ->constrained('departments')
-                ->cascadeOnDelete()
+                ->restrictOnDelete()
                 ->cascadeOnUpdate();
             $table->foreignId('unit_section_id')
                 ->constrained('unit_section')
-                ->cascadeOnDelete()
+                ->restrictOnDelete()
                 ->cascadeOnUpdate();
             $table->foreignId('position_id')
                 ->constrained('positions')
-                ->cascadeOnDelete()
+                ->restrictOnDelete()
                 ->cascadeOnUpdate();
-            $table->string('employment_id');
+
+            $table->string('employment_id')->unique();
             $table->string('employment_status');
-            $table->string('date_hired');
+            $table->date('date_hired');
             $table->string('sss_no')->nullable();
             $table->string('philhealth_no')->nullable();
             $table->string('pagibig_no')->nullable();

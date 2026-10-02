@@ -46,6 +46,7 @@ interface Props<T, P> {
   rowLabel?: (row: T) => string; // name shown in the delete confirmation
   filters?: Filter[]; // dropdown filters next to the search box
   twoColumn?: boolean; // wide, two-column form (for long forms)
+  rowActions?: (row: T) => ReactNode; // extra buttons shown before Edit / Delete
 }
 
 export default function CrudPage<T extends { id: number }, P extends object>({
@@ -56,6 +57,7 @@ export default function CrudPage<T extends { id: number }, P extends object>({
   rowLabel,
   filters = [],
   twoColumn = false,
+  rowActions,
 }: Props<T, P>) {
   const [data, setData] = useState<PaginatedResponse<T> | null>(null);
   const [page, setPage] = useState(1);
@@ -271,7 +273,7 @@ export default function CrudPage<T extends { id: number }, P extends object>({
                 {columns.map((c) => (
                   <th key={c.label} className="px-4 py-3">{c.label}</th>
                 ))}
-                <th className="w-24 px-4 py-3" />
+                <th className="w-32 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -285,6 +287,7 @@ export default function CrudPage<T extends { id: number }, P extends object>({
                     ))}
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
+                        {rowActions?.(row)}
                         <button
                           onClick={() => openEdit(row)}
                           aria-label="Edit"
