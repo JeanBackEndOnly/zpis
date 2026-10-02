@@ -33,7 +33,7 @@ export default function ProfileField({
     onChange ? onChange(e.target.value) : form.set(name, e.target.value);
 
   return (
-    <div className={full ? 'sm:col-span-2' : ''}>
+    <div className={`min-w-0 ${full ? 'sm:col-span-2' : ''}`}>
       <FormField label={optional ? `${label} (optional)` : label} error={form.errors[errorKey ?? name]?.[0]}>
         {type === 'select' ? (
           <select className="input" value={value} onChange={handle} required={!optional}>
