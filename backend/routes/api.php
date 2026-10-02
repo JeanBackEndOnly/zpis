@@ -45,6 +45,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
                 ->only(['index', 'store', 'show', 'update', 'destroy']);
 
             Route::get('employee-schedules/employees', [EmployeeScheduleController::class, 'employees']);
+            Route::get('employee-schedules/export', [EmployeeScheduleController::class, 'export']);
 
             Route::apiResource('employee-schedules', EmployeeScheduleController::class)
                 ->parameters(['employee-schedules' => 'employee_schedule'])

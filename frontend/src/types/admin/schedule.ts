@@ -16,6 +16,7 @@ export interface EmployeeSchedule {
   employee_id: number;
   schedule_id: number;
   effective_date: string; // "YYYY-MM-DD"
+  next_effective_date?: string | null; // when the employee's next schedule starts (null = no end date)
   employee_information?: {
     id: number;
     employment_id: string;

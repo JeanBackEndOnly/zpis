@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/Badge/Badge';
@@ -7,6 +7,18 @@ import FormField from '../../components/FormField/FormField';
 import Modal from '../../components/Modal/Modal';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useToast } from '../../hooks/useToast';
+import {
+  currentMonth,
+  dayBefore,
+  formatDate,
+  formatShortDate,
+  lastDayOfMonth,
+  monthName,
+  rangeFor,
+  shiftMonth,
+  type RangeKey,
+} from '../../lib/dateRange';
+import { downloadBlob } from '../../lib/downloadFile';
 import { getErrorMessage, getValidationErrors } from '../../lib/getErrorMessage';
 import { departmentService } from '../../services/admin/departmentService';
 import { employeeScheduleService } from '../../services/admin/employeeScheduleService';
@@ -46,13 +58,6 @@ function formatTime(value: string) {
   if (Number.isNaN(h) || Number.isNaN(m)) return value;
   const suffix = h >= 12 ? 'PM' : 'AM';
   return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${suffix}`;
-}
-
-// "2026-10-02" -> "Oct 2, 2026"
-function formatDate(value: string) {
-  const date = new Date(`${value.slice(0, 10)}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function fullName(user?: ScheduleUser) {
@@ -95,6 +100,14 @@ export default function EmployeeSchedules() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search);
   const [page, setPage] = useState(1);
+
+  // Date range category (semi-monthly halves, whole month, or custom) + CSV export
+  const [month, setMonth] = useState(currentMonth);
+  const [rangeKey, setRangeKey] = useState<RangeKey>('all');
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+  const [dateMode, setDateMode] = useState<'active' | 'starts'>('active');
+  const [exporting, setExporting] = useState(false);
 
   // Table
   const [data, setData] = useState<PaginatedResponse<EmployeeSchedule> | null>(null);
@@ -141,23 +154,36 @@ export default function EmployeeSchedules() {
     return map;
   }, [units]);
 
+  const range = useMemo(
+    () => rangeFor(rangeKey, month, customFrom, customTo),
+    [rangeKey, month, customFrom, customTo],
+  );
+
+  // The same filters feed the table and the CSV export
+  const filters = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      department_id: departmentId || undefined,
+      unit_section_id: unitId || undefined,
+      schedule_id: scheduleFilter || undefined,
+      date_from: range?.from,
+      date_to: range?.to,
+      date_mode: range ? dateMode : undefined,
+    }),
+    [debouncedSearch, departmentId, unitId, scheduleFilter, range, dateMode],
+  );
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await employeeScheduleService.list({
-        page,
-        search: debouncedSearch || undefined,
-        department_id: departmentId || undefined,
-        unit_section_id: unitId || undefined,
-        schedule_id: scheduleFilter || undefined,
-      });
+      const res = await employeeScheduleService.list({ page, ...filters });
       setData(res.data);
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, departmentId, unitId, scheduleFilter, toast]);
+  }, [page, filters, toast]);
 
   useEffect(() => {
     load();
@@ -175,6 +201,30 @@ export default function EmployeeSchedules() {
   function pickUnit(id: string) {
     setUnitId(id);
     setPage(1);
+  }
+
+  function pickRange(key: RangeKey) {
+    setRangeKey(key);
+    setPage(1);
+  }
+
+  function changeMonth(delta: number) {
+    setMonth((m) => shiftMonth(m, delta));
+    setPage(1);
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const blob = await employeeScheduleService.exportCsv(filters);
+      const suffix = range ? `_${range.from}_to_${range.to}` : '';
+      downloadBlob(blob, `employee-schedules${suffix}.csv`);
+      toast.success('CSV file downloaded.');
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setExporting(false);
+    }
   }
 
   // Modal helpers
@@ -279,10 +329,21 @@ export default function EmployeeSchedules() {
           <h2 className="text-2xl font-semibold tracking-tight">Employee Schedules</h2>
           <p className="text-sm text-gray-500">{data ? `${data.total} total` : 'Loading...'}</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Assign schedule
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            loading={exporting}
+            disabled={loading || data?.total === 0}
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            Assign schedule
+          </Button>
+        </div>
       </div>
 
       {refLoaded && refError && (
@@ -320,6 +381,112 @@ export default function EmployeeSchedules() {
             </div>
           </div>
         )}
+
+        {/* Date range category */}
+        <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Date range</p>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="Previous month"
+                onClick={() => changeMonth(-1)}
+                className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-100"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="min-w-36 text-center text-sm font-medium text-gray-700">{monthName(month)}</span>
+              <button
+                type="button"
+                aria-label="Next month"
+                onClick={() => changeMonth(1)}
+                className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-100"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Chip active={rangeKey === 'all'} onClick={() => pickRange('all')}>
+              All dates
+            </Chip>
+            <Chip active={rangeKey === 'first'} onClick={() => pickRange('first')}>
+              {`${formatShortDate(`${month}-01`)} – ${formatShortDate(`${month}-15`)}`}
+            </Chip>
+            <Chip active={rangeKey === 'second'} onClick={() => pickRange('second')}>
+              {`${formatShortDate(`${month}-16`)} – ${formatShortDate(`${month}-${lastDayOfMonth(month)}`)}`}
+            </Chip>
+            <Chip active={rangeKey === 'month'} onClick={() => pickRange('month')}>
+              Whole month
+            </Chip>
+            <Chip active={rangeKey === 'custom'} onClick={() => pickRange('custom')}>
+              Custom range
+            </Chip>
+          </div>
+
+          {rangeKey === 'custom' && (
+            <div className="mt-3 grid max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-gray-500">From</span>
+                <input
+                  type="date"
+                  className="input"
+                  value={customFrom}
+                  onChange={(e) => {
+                    setCustomFrom(e.target.value);
+                    setPage(1);
+                  }}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-gray-500">To</span>
+                <input
+                  type="date"
+                  className="input"
+                  min={customFrom || undefined}
+                  value={customTo}
+                  onChange={(e) => {
+                    setCustomTo(e.target.value);
+                    setPage(1);
+                  }}
+                />
+              </label>
+              {customFrom && customTo && customFrom > customTo && (
+                <p className="text-xs text-red-600 sm:col-span-2">The end date must be on or after the start date.</p>
+              )}
+            </div>
+          )}
+
+          {range && (
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+              <span>
+                Showing schedules <strong>{dateMode === 'active' ? 'in effect during' : 'starting within'}</strong>{' '}
+                {formatShortDate(range.from)} – {formatShortDate(range.to)}
+              </span>
+              <div className="ml-auto flex rounded-lg bg-white p-0.5 ring-1 ring-red-100">
+                <button
+                  type="button"
+                  onClick={() => setDateMode('active')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                    dateMode === 'active' ? 'bg-red-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  In effect
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDateMode('starts')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                    dateMode === 'starts' ? 'bg-red-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Starts in range
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -360,7 +527,7 @@ export default function EmployeeSchedules() {
                 <th className="px-4 py-3">Department / Unit</th>
                 <th className="px-4 py-3">Schedule</th>
                 <th className="px-4 py-3">Time</th>
-                <th className="px-4 py-3">Effective date</th>
+                <th className="px-4 py-3">Effective period</th>
                 <th className="w-24 px-4 py-3" />
               </tr>
             </thead>
@@ -395,7 +562,14 @@ export default function EmployeeSchedules() {
                         ? `${formatTime(row.schedule_template.schedule_from)} – ${formatTime(row.schedule_template.schedule_to)}`
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(row.effective_date)}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      <p>{formatDate(row.effective_date)}</p>
+                      <p className="text-xs text-gray-400">
+                        {row.next_effective_date
+                          ? `until ${formatDate(dayBefore(row.next_effective_date))}`
+                          : 'No end date'}
+                      </p>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
                         <button

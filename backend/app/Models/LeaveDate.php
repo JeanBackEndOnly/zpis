@@ -7,7 +7,7 @@ use App\Models\LeaveDetail;
 
 class LeaveDate extends Model
 {
-    protected $table = 'leave_details';
+    protected $table = 'leave_dates';
 
     protected $fillable = [
         'leave_id',
