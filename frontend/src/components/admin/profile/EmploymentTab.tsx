@@ -49,7 +49,7 @@ export default function EmploymentTab({ profile, onSaved }: Props) {
   const form = useSectionForm(
     {
       department_id: emp ? String(emp.department_id) : '',
-      unit_section_id: emp ? String(emp.unit_section_id) : '',
+      unit_section_id: emp?.unit_section_id ? String(emp.unit_section_id) : '',
       position_id: emp ? String(emp.position_id) : '',
       employment_id: emp?.employment_id ?? '',
       employment_status: emp?.employment_status ?? '',
@@ -73,7 +73,8 @@ export default function EmploymentTab({ profile, onSaved }: Props) {
       const payload = {
         ...values,
         department_id: Number(values.department_id),
-        unit_section_id: Number(values.unit_section_id),
+        // Departments without unit sections have no unit section
+        unit_section_id: values.unit_section_id ? Number(values.unit_section_id) : null,
         position_id: Number(values.position_id),
       };
       onSaved(await employeeProfileService.updateEmployment(userId, payload));
@@ -132,13 +133,16 @@ export default function EmploymentTab({ profile, onSaved }: Props) {
           options={departments.map((d) => ({ value: String(d.id), label: d.department_name }))}
           onChange={changeDepartment}
         />
-        <ProfileField
-          form={form}
-          name="unit_section_id"
-          label="Unit section"
-          type="select"
-          options={units.map((u) => ({ value: String(u.id), label: u.unit_section_name }))}
-        />
+        {/* Only shown when the selected department has unit sections */}
+        {units.length > 0 && (
+          <ProfileField
+            form={form}
+            name="unit_section_id"
+            label="Unit section"
+            type="select"
+            options={units.map((u) => ({ value: String(u.id), label: u.unit_section_name }))}
+          />
+        )}
         <ProfileField
           form={form}
           name="position_id"

@@ -4,63 +4,36 @@ namespace App\Policies;
 
 use App\Models\EmployeeSchedule;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class EmployeeSchedulePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    private function manage(User $user): bool
+    {
+        return $user->hasRole(User::ROLE_ADMIN, User::ROLE_HR);
+    }
+
     public function viewAny(User $user): bool
     {
-        return false;
+        return $this->manage($user);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, EmployeeSchedule $employeeSchedule): bool
     {
-        return false;
+        return $this->manage($user);
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $this->manage($user);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, EmployeeSchedule $employeeSchedule): bool
     {
-        return false;
+        return $this->manage($user);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, EmployeeSchedule $employeeSchedule): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, EmployeeSchedule $employeeSchedule): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, EmployeeSchedule $employeeSchedule): bool
-    {
-        return false;
+        return $this->manage($user);
     }
 }

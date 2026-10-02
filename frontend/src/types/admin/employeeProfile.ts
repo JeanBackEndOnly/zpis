@@ -24,7 +24,7 @@ export interface EmploymentInfo {
   id: number;
   user_id: number;
   department_id: number;
-  unit_section_id: number;
+  unit_section_id: number | null; // null when the department has no unit sections
   position_id: number;
   employment_id: string;
   employment_status: string;

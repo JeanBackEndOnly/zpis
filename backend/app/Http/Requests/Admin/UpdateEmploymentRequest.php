@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\EmployeeInformation;
 use App\Models\EmploymentDetail;
+use App\Models\UnitSection;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,12 +31,16 @@ class UpdateEmploymentRequest extends FormRequest
 
         $departmentId = $this->input('department_id');
 
+        // A unit section is required only when the department has unit sections
+        $departmentHasUnits = $departmentId
+            && UnitSection::where('department_id', $departmentId)->exists();
+
         return [
             // Employment
             'department_id'   => ['required', 'integer', Rule::exists('departments', 'id')],
             // The unit section and position must belong to the chosen department
             'unit_section_id' => [
-                'required',
+                $departmentHasUnits ? 'required' : 'nullable',
                 'integer',
                 Rule::exists('unit_section', 'id')->where('department_id', $departmentId),
             ],
@@ -78,6 +83,7 @@ class UpdateEmploymentRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'unit_section_id.required' => 'Please select a unit section for this department.',
             'unit_section_id.exists' => 'The selected unit section does not belong to the selected department.',
             'position_id.exists'     => 'The selected position does not belong to the selected department.',
             'employment_id.unique'   => 'This employment ID is already assigned to another employee.',

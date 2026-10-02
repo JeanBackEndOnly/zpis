@@ -9,8 +9,10 @@ import ComingSoon from './pages/admin/ComingSoon';
 import Dashboard from './pages/admin/Dashboard';
 import Departments from './pages/admin/Departments';
 import EmployeeProfile from './pages/admin/EmployeeProfile';
+import EmployeeSchedules from './pages/admin/EmployeeSchedules';
 import Employees from './pages/admin/Employees';
 import Positions from './pages/admin/Positions';
+import ScheduleTemplates from './pages/admin/ScheduleTemplates';
 import UnitSections from './pages/admin/UnitSections';
 
 // Modules that are in the menu but not built yet
@@ -19,7 +21,6 @@ const comingSoon = [
   { path: 'overtime', title: 'Overtime' },
   { path: 'payroll', title: 'Payroll' },
   { path: 'payslip', title: 'Payslip' },
-  { path: 'scheduling', title: 'Scheduling' },
   { path: 'announcements', title: 'Announcements' },
   { path: 'account-settings', title: 'Account Settings' },
 ];
@@ -44,6 +45,8 @@ export default function App() {
                 <Route path="departments" element={<Departments />} />
                 <Route path="unit-sections" element={<UnitSections />} />
                 <Route path="positions" element={<Positions />} />
+                <Route path="schedule-templates" element={<ScheduleTemplates />} />
+                <Route path="employee-schedules" element={<EmployeeSchedules />} />
                 {comingSoon.map((page) => (
                   <Route key={page.path} path={page.path} element={<ComingSoon title={page.title} />} />
                 ))}

@@ -24,7 +24,7 @@ export interface Option {
 export interface Field {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'date' | 'select' | 'department';
+  type: 'text' | 'email' | 'password' | 'date' | 'time' | 'select' | 'department';
   options?: Option[]; // for type "select"
   required?: boolean | 'create'; // default true; 'create' = required only when adding
   placeholder?: string;
@@ -122,7 +122,15 @@ export default function CrudPage<T extends { id: number }, P extends object>({
   function openEdit(row: T) {
     const record = row as unknown as Record<string, unknown>;
     setEditingId(row.id);
-    setForm(Object.fromEntries(fields.map((f) => [f.name, String(record[f.name] ?? '')])));
+    setForm(
+      Object.fromEntries(
+        fields.map((f) => {
+          const value = String(record[f.name] ?? '');
+          // Laravel returns "HH:mm:ss"; the API validates "HH:mm"
+          return [f.name, f.type === 'time' ? value.slice(0, 5) : value];
+        }),
+      ),
+    );
     setFormErrors({});
     setFormError('');
     setOpen(true);

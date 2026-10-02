@@ -44,7 +44,14 @@ export const adminNav: NavItem[] = [
   { label: 'Overtime', icon: Clock, to: '/admin/overtime' },
   { label: 'Payroll', icon: Wallet, to: '/admin/payroll' },
   { label: 'Payslip', icon: Receipt, to: '/admin/payslip' },
-  { label: 'Scheduling', icon: CalendarClock, to: '/admin/scheduling' },
+  {
+    label: 'Scheduling',
+    icon: CalendarClock,
+    children: [
+      { label: 'Schedule Template', to: '/admin/schedule-templates' },
+      { label: 'Employee Schedule', to: '/admin/employee-schedules' },
+    ],
+  },
   { label: 'Attendance', icon: CalendarCheck, to: '/admin/attendance' },
   { label: 'Announcements', icon: Megaphone, to: '/admin/announcements' },
   { label: 'Account Settings', icon: UserCog, to: '/admin/account-settings' },

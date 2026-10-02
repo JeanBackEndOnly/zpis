@@ -10,7 +10,7 @@ export const employeeProfileService = {
   updatePersonal: async (id: number, payload: Record<string, string>) =>
     (await api.put<ProfileResponse>(`/admin/employees/${id}/personal`, payload)).data,
 
-  updateEmployment: async (id: number, payload: Record<string, string | number>) =>
+  updateEmployment: async (id: number, payload: Record<string, string | number | null>) =>
     (await api.put<ProfileResponse>(`/admin/employees/${id}/employment`, payload)).data,
 
   updateLeave: async (id: number, payload: LeavePayload) =>

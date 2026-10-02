@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EmployeeProfileController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\UnitSectionController;
 use App\Http\Controllers\Admin\ScheduleTemplateController;
+use App\Http\Controllers\Admin\EmployeeScheduleController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\AuthenticationController;
 use Illuminate\Http\Request;
@@ -40,6 +41,13 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
                 ->only(['index', 'store', 'show', 'update', 'destroy']);
             
             Route::apiResource('schedules', ScheduleTemplateController::class)
+                ->parameters(['schedules' => 'schedule_template'])
+                ->only(['index', 'store', 'show', 'update', 'destroy']);
+
+            Route::get('employee-schedules/employees', [EmployeeScheduleController::class, 'employees']);
+
+            Route::apiResource('employee-schedules', EmployeeScheduleController::class)
+                ->parameters(['employee-schedules' => 'employee_schedule'])
                 ->only(['index', 'store', 'show', 'update', 'destroy']);
 
             // Employee profile page: one GET loads everything, one PUT per tab
@@ -52,5 +60,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
                     Route::put('/employment', [EmployeeProfileController::class, 'updateEmployment'])->name('employment.update');
                     Route::put('/leave', [EmployeeProfileController::class, 'updateLeave'])->name('leave.update');
                 });
+
+            
         });
 });
