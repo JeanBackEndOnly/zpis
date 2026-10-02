@@ -1,4 +1,5 @@
 import {
+  CalendarCheck,
   CalendarClock,
   CalendarDays,
   Clock,
@@ -44,6 +45,7 @@ export const adminNav: NavItem[] = [
   { label: 'Payroll', icon: Wallet, to: '/admin/payroll' },
   { label: 'Payslip', icon: Receipt, to: '/admin/payslip' },
   { label: 'Scheduling', icon: CalendarClock, to: '/admin/scheduling' },
+  { label: 'Attendance', icon: CalendarCheck, to: '/admin/attendance' },
   { label: 'Announcements', icon: Megaphone, to: '/admin/announcements' },
   { label: 'Account Settings', icon: UserCog, to: '/admin/account-settings' },
 ];

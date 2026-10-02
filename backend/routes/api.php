@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DepartmentsController;
 use App\Http\Controllers\Admin\EmployeeProfileController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\UnitSectionController;
+use App\Http\Controllers\Admin\ScheduleTemplateController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\AuthenticationController;
 use Illuminate\Http\Request;
@@ -36,6 +37,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
             // Accounts (the Employees table: add, edit, delete)
             Route::apiResource('users', UsersController::class)
+                ->only(['index', 'store', 'show', 'update', 'destroy']);
+            
+            Route::apiResource('schedules', ScheduleTemplateController::class)
                 ->only(['index', 'store', 'show', 'update', 'destroy']);
 
             // Employee profile page: one GET loads everything, one PUT per tab

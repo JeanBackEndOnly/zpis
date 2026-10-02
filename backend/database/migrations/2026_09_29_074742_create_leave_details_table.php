@@ -19,6 +19,13 @@ return new class extends Migration
                 ->cascadeOnUpdate();
             $table->enum('leave_type', ['special_leave', 'vacation_leave', 'sick_leave', 'others_leave']);
             $table->string('others_specify')->nullable();
+            $table->string('purpose');
+            $table->integer('number_of_days');
+            $table->string('contact');
+            $table->string('section_head');
+            $table->string('department_head');
+            $table->string('medical_proof')->nullable();
+            $table->date('request_date');
             $table->enum('leave_status', ['pending', 'approve', 'disapproved']);
             $table->timestamps();
         });
