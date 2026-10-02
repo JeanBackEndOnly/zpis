@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-gray-50 font-sans text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  /* Shared style for <input> and <select> */
+  .input {
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10;
+  }
+}
+
+/* Toast notifications */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(1.5rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toast-progress {
+  from { width: 100%; }
+  to { width: 0; }
+}
+
+.toast-in { animation: toast-in 0.25s ease-out; }
+.toast-progress { animation-name: toast-progress; animation-timing-function: linear; animation-fill-mode: forwards; }
