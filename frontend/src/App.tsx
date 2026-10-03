@@ -5,19 +5,20 @@ import { AuthProvider } from './features/auth/AuthProvider';
 import RequireAuth from './features/auth/RequireAuth';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import MyLeave from './pages/MyLeave';
 import ComingSoon from './pages/admin/ComingSoon';
 import Dashboard from './pages/admin/Dashboard';
 import Departments from './pages/admin/Departments';
 import EmployeeProfile from './pages/admin/EmployeeProfile';
 import EmployeeSchedules from './pages/admin/EmployeeSchedules';
 import Employees from './pages/admin/Employees';
+import LeaveManagement from './pages/admin/LeaveManagement';
 import Positions from './pages/admin/Positions';
 import ScheduleTemplates from './pages/admin/ScheduleTemplates';
 import UnitSections from './pages/admin/UnitSections';
 
 // Modules that are in the menu but not built yet
 const comingSoon = [
-  { path: 'leave-management', title: 'Leave Management' },
   { path: 'overtime', title: 'Overtime' },
   { path: 'payroll', title: 'Payroll' },
   { path: 'payslip', title: 'Payslip' },
@@ -35,6 +36,7 @@ export default function App() {
 
             <Route element={<RequireAuth />}>
               <Route path="/" element={<Home />} />
+              <Route path="/leave" element={<MyLeave />} />
             </Route>
 
             <Route element={<RequireAuth adminOnly />}>
@@ -47,6 +49,7 @@ export default function App() {
                 <Route path="positions" element={<Positions />} />
                 <Route path="schedule-templates" element={<ScheduleTemplates />} />
                 <Route path="employee-schedules" element={<EmployeeSchedules />} />
+                <Route path="leave-management" element={<LeaveManagement />} />
                 {comingSoon.map((page) => (
                   <Route key={page.path} path={page.path} element={<ComingSoon title={page.title} />} />
                 ))}

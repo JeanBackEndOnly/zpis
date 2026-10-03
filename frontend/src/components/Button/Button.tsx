@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react';
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger' | 'success';
   loading?: boolean;
 }
 
@@ -9,6 +9,7 @@ const variants = {
   primary: 'bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:ring-red-500/30',
   secondary: 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-300/50',
   danger: 'bg-red-50 text-red-700 hover:bg-red-100 focus-visible:ring-red-500/30',
+  success: 'bg-green-600 text-white shadow-sm hover:bg-green-700 focus-visible:ring-green-500/30',
 };
 
 export default function Button({

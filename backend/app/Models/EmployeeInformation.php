@@ -71,4 +71,10 @@ class EmployeeInformation extends Model
     {
         return $this->hasMany(LeaveCredit::class, 'employee_id');
     }
+
+    // Leave requests filed by this employee
+    public function leaveDetails(): HasMany
+    {
+        return $this->hasMany(LeaveDetail::class, 'employee_id');
+    }
 }

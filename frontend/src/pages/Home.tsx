@@ -18,6 +18,12 @@ export default function Home() {
         </p>
 
         <div className="mt-6 flex flex-col gap-2">
+          <Link
+            to="/leave"
+            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            My leave requests
+          </Link>
           {user?.user_role === 'admin' && (
             <Link
               to="/admin"

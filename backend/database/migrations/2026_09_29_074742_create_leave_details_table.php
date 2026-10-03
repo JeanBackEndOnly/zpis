@@ -22,11 +22,12 @@ return new class extends Migration
             $table->string('purpose');
             $table->integer('number_of_days');
             $table->string('contact');
-            $table->string('section_head');
-            $table->string('department_head');
+            // Optional on the request form
+            $table->string('section_head')->nullable();
+            $table->string('department_head')->nullable();
             $table->string('medical_proof')->nullable();
             $table->date('request_date');
-            $table->enum('leave_status', ['pending', 'approve', 'disapproved']);
+            $table->enum('leave_status', ['pending', 'approve', 'disapproved'])->default('pending');
             $table->timestamps();
         });
     }
