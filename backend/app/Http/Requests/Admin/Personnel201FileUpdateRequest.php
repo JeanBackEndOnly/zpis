@@ -8,9 +8,10 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Adding a file to an employee's 201 file.
+ * Editing a document in an employee's 201 file.
+ * The file is optional: leave it out to keep the current one.
  */
-class Personnel201FilesRequest extends FormRequest
+class Personnel201FileUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -24,8 +25,8 @@ class Personnel201FilesRequest extends FormRequest
     {
         return [
             'file_type' => ['required', Rule::in(Personnel201File::TYPES)],
-            'file_name' => ['nullable', 'string', 'max:255'],
-            'file'      => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'], // 5 MB
+            'file_name' => ['required', 'string', 'max:255'],
+            'file'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'], // 5 MB
         ];
     }
 
@@ -34,7 +35,7 @@ class Personnel201FilesRequest extends FormRequest
         return [
             'file_type.required' => 'Please choose the type of document.',
             'file_type.in'       => 'Please choose a valid type of document.',
-            'file.required'      => 'Please choose a file to upload.',
+            'file_name.required' => 'The file name is required.',
             'file.file'          => 'The upload must be a file.',
             'file.mimes'         => 'The file must be a PDF, JPG, PNG, DOC or DOCX file.',
             'file.max'           => 'The file may not be larger than 5 MB.',

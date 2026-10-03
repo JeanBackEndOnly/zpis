@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UnitSectionController;
 use App\Http\Controllers\Admin\ScheduleTemplateController;
 use App\Http\Controllers\Admin\EmployeeScheduleController;
 use App\Http\Controllers\Admin\LeaveDetailsController;
+use App\Http\Controllers\Admin\Personnel201FilesController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\LeaveRequestController;
@@ -46,7 +47,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
             // Accounts (the Employees table: add, edit, delete)
             Route::apiResource('users', UsersController::class)
                 ->only(['index', 'store', 'show', 'update', 'destroy']);
-            
+
             Route::apiResource('schedules', ScheduleTemplateController::class)
                 ->parameters(['schedules' => 'schedule_template'])
                 ->only(['index', 'store', 'show', 'update', 'destroy']);
@@ -63,6 +64,23 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
             Route::put('leave-details/{leave_detail}/disapprove', [LeaveDetailsController::class, 'disapprove'])
                 ->whereNumber('leave_detail')
                 ->name('leave-details.disapprove');
+
+            // Personnel 201 files: every employee's documents
+            Route::prefix('personnel-201-files')
+                ->name('personnel-201-files.')
+                ->group(function () {
+                    Route::get('/', [Personnel201FilesController::class, 'index'])->name('index');
+                    Route::get('employee/{employee_information}', [Personnel201FilesController::class, 'show'])
+                        ->whereNumber('employee_information')->name('show');
+                    Route::post('employee/{employee_information}', [Personnel201FilesController::class, 'store'])
+                        ->whereNumber('employee_information')->name('store');
+                    Route::post('{personnel_file}', [Personnel201FilesController::class, 'update'])
+                        ->whereNumber('personnel_file')->name('update');
+                    Route::get('{personnel_file}/download', [Personnel201FilesController::class, 'download'])
+                        ->whereNumber('personnel_file')->name('download');
+                    Route::delete('{personnel_file}', [Personnel201FilesController::class, 'destroy'])
+                        ->whereNumber('personnel_file')->name('destroy');
+                });
 
             Route::get('employee-schedules/employees', [EmployeeScheduleController::class, 'employees']);
             Route::get('employee-schedules/export', [EmployeeScheduleController::class, 'export']);
@@ -81,7 +99,5 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
                     Route::put('/employment', [EmployeeProfileController::class, 'updateEmployment'])->name('employment.update');
                     Route::put('/leave', [EmployeeProfileController::class, 'updateLeave'])->name('leave.update');
                 });
-
-            
         });
 });

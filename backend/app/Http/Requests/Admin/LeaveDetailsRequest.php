@@ -34,6 +34,13 @@ class LeaveDetailsRequest extends FormRequest
             'contact'         => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s()]+$/'],
             'section_head'    => ['nullable', 'string', 'max:255'],
             'department_head' => ['nullable', 'string', 'max:255'],
+            'medical_proof' => [
+                'required_if:leave_type,' . LeaveDetail::TYPE_SICK,
+                'nullable',
+                'file',
+                'mimes:pdf,jpg,jpeg,png',
+                'max:5120',
+            ],
         ];
     }
 

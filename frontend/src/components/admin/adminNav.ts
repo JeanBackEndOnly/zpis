@@ -3,6 +3,7 @@ import {
   CalendarClock,
   CalendarDays,
   Clock,
+  FolderOpen,
   LayoutDashboard,
   Megaphone,
   Receipt,
@@ -31,6 +32,7 @@ export type NavItem = NavLinkItem | NavGroupItem;
 export const adminNav: NavItem[] = [
   { label: 'Dashboard', icon: LayoutDashboard, to: '/admin', end: true },
   { label: 'Employees', icon: Users, to: '/admin/employees' },
+  { label: 'Personnel 201 Files', icon: FolderOpen, to: '/admin/personnel-201-files' },
   {
     label: 'System Management',
     icon: Settings2,

@@ -63,3 +63,14 @@ export interface LeaveCounts {
 export interface LeaveListResponse extends ApiResponse<PaginatedResponse<LeaveRequest>> {
   counts: LeaveCounts;
 }
+
+export interface LeaveRequestPayload {
+  leave_type: LeaveType;
+  others_specify: string | null;
+  purpose: string;
+  dates: string[];
+  contact: string;
+  section_head: string | null;
+  department_head: string | null;
+  medical_proof: File | null; // <-- add this
+}

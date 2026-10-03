@@ -1,5 +1,5 @@
-import { Plus, X } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { Paperclip, Plus, X } from 'lucide-react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { getErrorMessage, getValidationErrors } from '../../lib/getErrorMessage';
 import { leaveRequestService } from '../../services/leaveRequestService';
 import type { ValidationErrors } from '../../types/api';
@@ -12,6 +12,9 @@ const typeOptions: { value: LeaveType; label: string }[] = [
   { value: 'sick_leave', label: 'Sick Leave' },
   { value: 'special_leave', label: 'Special Leave' },
 ];
+
+const MAX_PROOF_BYTES = 5 * 1024 * 1024;
+const PROOF_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 
 const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-600';
 
@@ -31,6 +34,8 @@ function RequestForm({ onSubmitted }: { onSubmitted: (message: string) => void }
   const [contact, setContact] = useState('');
   const [sectionHead, setSectionHead] = useState('');
   const [departmentHead, setDepartmentHead] = useState('');
+  const [medicalProof, setMedicalProof] = useState<File | null>(null);
+  const proofInput = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -40,10 +45,31 @@ function RequestForm({ onSubmitted }: { onSubmitted: (message: string) => void }
   const hasDuplicates = dates.filter(Boolean).length !== pickedDates.length;
 
   const isOthers = leaveType === 'others_leave';
+  const isSick = leaveType === 'sick_leave';
   const error = (key: string) => errors[key]?.[0];
 
   const setDate = (index: number, value: string) =>
     setDates((prev) => prev.map((d, i) => (i === index ? value : d)));
+
+  function pickProof(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    e.target.value = '';
+    if (!file) return;
+
+    if (!PROOF_TYPES.includes(file.type)) {
+      setMedicalProof(null);
+      setErrors((prev) => ({ ...prev, medical_proof: ['The medical proof must be a PDF, JPG or PNG file.'] }));
+      return;
+    }
+    if (file.size > MAX_PROOF_BYTES) {
+      setMedicalProof(null);
+      setErrors((prev) => ({ ...prev, medical_proof: ['The medical proof may not be larger than 5 MB.'] }));
+      return;
+    }
+
+    setErrors((prev) => ({ ...prev, medical_proof: [] }));
+    setMedicalProof(file);
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -52,6 +78,11 @@ function RequestForm({ onSubmitted }: { onSubmitted: (message: string) => void }
 
     if (!leaveType) {
       setErrors({ leave_type: ['Please choose the type of leave.'] });
+      return;
+    }
+
+    if (isSick && !medicalProof) {
+      setErrors({ medical_proof: ['Please upload your medical proof for a sick leave.'] });
       return;
     }
 
@@ -65,6 +96,7 @@ function RequestForm({ onSubmitted }: { onSubmitted: (message: string) => void }
         contact,
         section_head: sectionHead || null,
         department_head: departmentHead || null,
+        medical_proof: isSick ? medicalProof : null,
       });
       onSubmitted(res.message);
     } catch (err) {
@@ -127,6 +159,44 @@ function RequestForm({ onSubmitted }: { onSubmitted: (message: string) => void }
         </div>
         <FieldError message={error('leave_type') ?? error('others_specify')} />
       </fieldset>
+
+      {/* Medical proof (sick leave only) */}
+      {isSick && (
+        <div className="mb-5">
+          <span className={labelClass}>
+            Medical proof
+            <Required />
+          </span>
+          <input
+            ref={proofInput}
+            type="file"
+            className="hidden"
+            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+            onChange={pickProof}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="button" variant="secondary" onClick={() => proofInput.current?.click()}>
+              <Paperclip className="h-4 w-4" />
+              {medicalProof ? 'Change file' : 'Upload file'}
+            </Button>
+            {medicalProof && (
+              <span className="flex min-w-0 items-center gap-1 text-sm text-gray-700">
+                <span className="truncate [overflow-wrap:anywhere]">{medicalProof.name}</span>
+                <button
+                  type="button"
+                  aria-label="Remove medical proof"
+                  onClick={() => setMedicalProof(null)}
+                  className="rounded-lg p-1 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-gray-500">Medical certificate or prescription. PDF, JPG or PNG, up to 5 MB.</p>
+          <FieldError message={error('medical_proof')} />
+        </div>
+      )}
 
       {/* Course / purpose */}
       <label className="mb-5 block">

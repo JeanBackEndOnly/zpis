@@ -72,6 +72,12 @@ class EmployeeInformation extends Model
         return $this->hasMany(LeaveCredit::class, 'employee_id');
     }
 
+        // 201 file documents kept for this employee
+    public function personnel_files(): HasMany
+    {
+        return $this->hasMany(Personnel201File::class, 'employee_id');
+    }
+
     // Leave requests filed by this employee
     public function leaveDetails(): HasMany
     {

@@ -16,6 +16,8 @@ import LeaveManagement from './pages/admin/LeaveManagement';
 import Positions from './pages/admin/Positions';
 import ScheduleTemplates from './pages/admin/ScheduleTemplates';
 import UnitSections from './pages/admin/UnitSections';
+import EmployeeFiles from './pages/admin/EmployeeFiles';
+import Personnel201Files from './pages/admin/Personnel201Files';
 
 // Modules that are in the menu but not built yet
 const comingSoon = [
@@ -44,6 +46,8 @@ export default function App() {
                 <Route index element={<Dashboard />} />
                 <Route path="employees" element={<Employees />} />
                 <Route path="employees/:id" element={<EmployeeProfile />} />
+                <Route path="personnel-201-files" element={<Personnel201Files />} />
+                <Route path="personnel-201-files/:id" element={<EmployeeFiles />} />
                 <Route path="departments" element={<Departments />} />
                 <Route path="unit-sections" element={<UnitSections />} />
                 <Route path="positions" element={<Positions />} />
